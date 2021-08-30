@@ -1,0 +1,140 @@
+{% extends 'base.html' %}
+{% block title %}Игра {{ room_name }}{% endblock title %}
+{% block head %}
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'SeaBattle/style.css' %}">
+    <script src="{% static 'SeaBattle/game.js' %}" type="text/javascript"></script>
+{% endblock head %}
+{% block content %}
+    <div class="row">
+        <div class="col-auto">
+            <h3>Поле соперника</h3>
+            <table border="2" cellspacing="5" cellpadding="16" id="rival">
+                {% for i in rival_field %}
+                    <tr>
+                        {% for j in i %}
+                            {% if room.FieldData.ReadyFirstUser and room.FieldData.ReadySecondUser %}
+                                <td bgcolor="{{ color.j }}" class="tdr" id="rival_td">
+                            </td>
+                            {% else %}
+                                <td bgcolor="{{ color.j }}">
+                            </td>
+                            {% endif %}
+                        {% endfor %}
+                    </tr>
+                {% endfor %}
+            </table>
+            {% if room.FieldData.ReadyFirstUser and room.FieldData.ReadySecondUser %}
+                <input type="submit" value="Сделать ход" class="btn btn-success mt-4" id="input_move">
+            {% else %}
+                <input type="submit" value="Сделать ход" class="btn btn-success mt-4" disabled>
+            {% endif %}
+        </div>
+        <div class="col-auto">
+            <h3>Ваше поле</h3>
+            <table border="2" cellspacing="5" cellpadding="16" id="you">
+                {% for i in you_field %}
+                    <tr>
+                        {% for j in i %}
+                            {% if room.FieldData.ReadyFirstUser and room.FieldData.ReadySecondUser %}
+                                <td bgcolor="{{ color.j }}">
+                                </td>
+                            {% else %}
+                                <td bgcolor="{{ color.j }}" class="td">
+                                </td>
+                            {% endif %}
+                        {% endfor %}
+                    </tr>
+                {% endfor %}
+            </table>
+            {% if not you_ready %}
+                <input type="submit" value="Отправить таблицу" class="btn btn-success mt-4" id="you_field">
+            {% endif %}
+        </div>
+    </div>
+    <div class="mt-2">
+        <h3>Чат</h3>
+        <textarea class="row" cols="70" rows="7" id="chat-message-textarea" disabled></textarea>
+        <input type="text" class="row mt-2" id="chat-message-input">
+        <input type="submit" value="Отправить сообщение" class="btn btn-success mt-4 row" id="you_message">
+    </div>
+<script type="text/javascript">
+{% autoescape off %}
+    var move = null;
+    var roomName = {{ room_name }};
+
+    var YouField = {{ you_field }};
+    var RivalField = {{ rival_field }};
+    var color = {{ color }};
+{% endautoescape %}
+    printField(YouField, 'you', color);
+    printField(RivalField, 'rival', color);
+
+    //////
+    var chatSocket = new WebSocket(
+        'ws://' + window.location.host + '/ws/game/' + roomName + '/');
+
+    chatSocket.onmessage = function(e) {
+        var data = JSON.parse(e.data);
+        console.log(data);
+        if (data['you_field'] != null){
+
+        }
+        if (data['message'] != null){
+            writeMessage(data['message']);
+        }
+        if (data['move'] != null){
+            writeMove(data['move'], color);
+        }
+    };
+
+    chatSocket.onclose = function(e) {
+        console.error('Chat socket closed unexpectedly');
+    };
+
+{% if not you_ready %}
+    document.querySelector('#you_field').onclick = function(e) {
+        var input = document.querySelector('#you_field');
+        input.style.visibility = 'hidden';
+        chatSocket.send(JSON.stringify({
+            'you_field': YouField
+        }))};
+{% endif %}
+
+    document.querySelector('#you_message').onclick = function(e) {
+        var messageInputDom = document.querySelector('#chat-message-input');
+        var message = messageInputDom.value;
+        chatSocket.send(JSON.stringify({
+            'message': message
+        }))
+        messageInputDom.value = '';
+        };
+
+{% if room.FieldData.ReadyFirstUser and room.FieldData.ReadySecondUser %}
+    document.querySelector('#input_move').onclick = function(e) {
+        chatSocket.send(JSON.stringify({
+            'move': move
+        }))};
+        move = null;
+{% endif %}
+
+    ///////
+$(function(){
+    $('.tdr').click(function(){
+        if (move == null){
+            if (YouField[$(this).closest('tr').index()][$(this).index()] == 0){
+                YouField[$(this).closest('tr').index()][$(this).index()] = 3;
+                this.bgColor = color[3];
+                move = [$(this).closest('tr').index(), $(this).index()]
+            }
+        }
+        else if ([$(this).closest('tr').index(), $(this).index()].join() == move.join()){
+            YouField[$(this).closest('tr').index()][$(this).index()] = 0;
+            this.bgColor = color[0];
+            move = null;
+        }
+       });
+});
+
+</script>
+{% endblock content %}

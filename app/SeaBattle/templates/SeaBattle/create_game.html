@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+{% block title %}Создание игры SeaBattles{% endblock title %}
+{% block content %}
+    <div class="row">
+        <div class="col-md-6 offset-md-3">
+            <form action="" method="POST">
+                {% csrf_token %}
+                {{ form.as_p }}
+                <input type="submit" class="btn btn-success" value="Создать">
+            </form>
+        </div>
+    </div>
+{% endblock content %}

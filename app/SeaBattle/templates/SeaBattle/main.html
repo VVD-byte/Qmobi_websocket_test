@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+{% block title %}Главная SeaBatlse{% endblock title %}
+{% block content %}
+<div>
+    {% if user_room %}
+    <h3 >Комнаты пользователя</h3>
+    {% endif %}
+    {% for i in user_room %}
+        <div>
+            <a href="/game/{{ i.id }}">{{ i.NameRoom }}</a>
+        </div>
+    {% endfor %}
+</div>
+{% endblock content %}

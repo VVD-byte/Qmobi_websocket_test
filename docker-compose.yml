@@ -1,0 +1,11 @@
+version: "3.9"
+services:
+  app:
+    build: app/
+    command: python Qmobi/manage.py runserver 0.0.0.0:8000
+    restart: always
+    ports:
+      - "3306:3306"
+      - "8000:8000"
+  redis:
+      image: "redis:6.2.5"
