@@ -24,10 +24,10 @@
                     </tr>
                 {% endfor %}
             </table>
-            {% if room.FieldData.ReadyFirstUser and room.FieldData.ReadySecondUser %}
+            {% if room.FieldData.ReadyFirstUser and room.FieldData.ReadySecondUser and user_turn %}
                 <input type="submit" value="Сделать ход" class="btn btn-success mt-4" id="input_move">
             {% else %}
-                <input type="submit" value="Сделать ход" class="btn btn-success mt-4" disabled>
+                <input type="submit" value="Сделать ход" class="btn btn-success mt-4" disabled id="input_move">
             {% endif %}
         </div>
         <div class="col-auto">
@@ -54,14 +54,16 @@
     </div>
     <div class="mt-2">
         <h3>Чат</h3>
-        <textarea class="row" cols="70" rows="7" id="chat-message-textarea" disabled></textarea>
+        <textarea class="row" cols="70" rows="7" id="chat-message-textarea" disabled>
+            {{ message }}
+        </textarea>
         <input type="text" class="row mt-2" id="chat-message-input">
         <input type="submit" value="Отправить сообщение" class="btn btn-success mt-4 row" id="you_message">
-    </div>
-<script type="text/javascript">
+        <script type="text/javascript">
 {% autoescape off %}
     var move = null;
     var roomName = {{ room_name }};
+    var user_id = {{ user.id }};
 
     var YouField = {{ you_field }};
     var RivalField = {{ rival_field }};
@@ -78,12 +80,13 @@
         var data = JSON.parse(e.data);
         console.log(data);
         if (data['you_field'] != null){
-
+            writeField(data['you_field']);
         }
         if (data['message'] != null){
             writeMessage(data['message']);
         }
         if (data['move'] != null){
+            input_move_disable_unable();
             writeMove(data['move'], color);
         }
     };
@@ -114,27 +117,15 @@
     document.querySelector('#input_move').onclick = function(e) {
         chatSocket.send(JSON.stringify({
             'move': move
-        }))};
+        }))
         move = null;
+        };
 {% endif %}
 
     ///////
-$(function(){
-    $('.tdr').click(function(){
-        if (move == null){
-            if (YouField[$(this).closest('tr').index()][$(this).index()] == 0){
-                YouField[$(this).closest('tr').index()][$(this).index()] = 3;
-                this.bgColor = color[3];
-                move = [$(this).closest('tr').index(), $(this).index()]
-            }
-        }
-        else if ([$(this).closest('tr').index(), $(this).index()].join() == move.join()){
-            YouField[$(this).closest('tr').index()][$(this).index()] = 0;
-            this.bgColor = color[0];
-            move = null;
-        }
-       });
-});
+
+tdr();
 
 </script>
+    </div>
 {% endblock content %}

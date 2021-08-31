@@ -1,8 +1,7 @@
 from channels.auth import AuthMiddlewareStack
 from channels.routing import ProtocolTypeRouter, URLRouter
 
-from app.SeaBattle import routing
-
+from SeaBattle import routing
 
 application = ProtocolTypeRouter({
     'websocket': AuthMiddlewareStack(

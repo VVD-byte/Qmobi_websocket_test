@@ -27,6 +27,7 @@ class RoomFieldDataModels(BaseModel):
     )
     ReadyFirstUser = models.BooleanField(default=False)
     ReadySecondUser = models.BooleanField(default=False)
+    UserTurn = models.ForeignKey(User, on_delete=models.CASCADE, related_name='user_turn')
 
 
 class RoomModels(BaseModel):

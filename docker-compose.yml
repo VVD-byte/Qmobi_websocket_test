@@ -1,11 +1,23 @@
 version: "3.9"
 services:
-  app:
-    build: app/
-    command: python Qmobi/manage.py runserver 0.0.0.0:8000
-    restart: always
-    ports:
-      - "3306:3306"
-      - "8000:8000"
   redis:
-      image: "redis:6.2.5"
+    image: "redis:6.2.5"
+    restart: always
+  db:
+    image: postgres
+    restart: always
+    environment:
+      - POSTGRES_PASSWORD=vova
+      - POSTGRES_USER=vova
+      - POSTGRES_DB=qmobi
+  app:
+    build: .
+    command: bash -c "python manage.py makemigrations & python manage.py migrate & python manage.py runserver 0.0.0.0:8000"
+    restart: always
+    volumes:
+      - ./:/usr/src/app/
+    ports:
+      - "8000:8000"
+    depends_on:
+      - redis
+      - db

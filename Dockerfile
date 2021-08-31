@@ -1,8 +1,7 @@
 FROM python:3.9.6
-WORKDIR /app
+WORKDIR /usr/src/app
 RUN apt-get update
-COPY requirements.txt requirements.txt
+COPY requirements.txt .
 RUN pip install -r requirements.txt
-EXPOSE 3306
 EXPOSE 8000
-COPY . /app
+COPY . /usr/src/app

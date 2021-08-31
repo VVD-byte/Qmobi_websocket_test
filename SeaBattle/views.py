@@ -5,7 +5,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
 from django.db.models import Q
 from django.apps import apps
-from app.SeaBattle import forms
+from . import forms
 
 RoomModels = apps.get_model('SeaBattle', 'RoomModels')
 MessageModels = apps.get_model('SeaBattle', 'MessageModels')
@@ -41,6 +41,7 @@ class ConnectGameView(View):
             Active=True
         ).first()
         if room:
+            user_turn = room.FieldData.UserTurn == request.user
             if room.FirstUser == request.user:
                 you_field = room.FieldData.FirstUserField
                 you_ready = room.FieldData.ReadyFirstUser
@@ -50,12 +51,13 @@ class ConnectGameView(View):
                 you_ready = room.FieldData.ReadySecondUser
                 rival_field = room.FieldData.FirstUserField
             rival_field = [[j if j != 3 else 0 for j in i] for i in rival_field]
-            message = MessageModels.objects.filter(Room=room)
+            message = '\n'.join([i.Message for i in MessageModels.objects.filter(Room=room).order_by('-Date')])
             return render(request, 'SeaBattle/game_field.html', {'room_name': room_name, 'room': room,
                                                                  'you_field': you_field,
                                                                  'you_ready': you_ready,
                                                                  'rival_field': rival_field,
                                                                  'message': message,
+                                                                 'user_turn': user_turn,
                                                                  'color': ["#FFFFFF", "#000000", "#FF0000", "#f3bd48"]})
         return HttpResponseRedirect("/")
 
@@ -72,14 +74,15 @@ class CreateGameView(View):
         if form.is_valid():
             RF = RoomFieldDataModels(
                 FirstUserField=[[0 for i in range(10)] for j in range(10)],
-                SecondUserField=[[0 for i in range(10)] for j in range(10)]
+                SecondUserField=[[0 for i in range(10)] for j in range(10)],
+                UserTurn=request.user,
             )
             RF.save()
             room = RoomModels(
                 NameRoom=form.cleaned_data['NameRoom'],
                 FirstUser=request.user,
                 SecondUser=form.cleaned_data['SecondUser'],
-                FieldData=RF
+                FieldData=RF,
             )
             room.save()
             return HttpResponseRedirect("/")

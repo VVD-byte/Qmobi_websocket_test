@@ -35,14 +35,19 @@ class ConsumerLogic:
             return
         room = RoomModels.objects.filter(id=int(self.room_name)).first()
         fields = room.FieldData
-        if room.FirstUser == scope.get('user', None):
+        if fields.UserTurn != scope.get('user', None):
+            return
+        if room.SecondUser == scope.get('user', None):
             fields.FirstUserField[move[0]][move[1]] = self.color[fields.FirstUserField[move[0]][move[1]]]
+            fields.UserTurn = room.FirstUser
             fields.save()
             move.append(fields.FirstUserField[move[0]][move[1]])
-        elif room.SecondUser == scope.get('user', None):
+        elif room.FirstUser == scope.get('user', None):
             fields.SecondUserField[move[0]][move[1]] = self.color[fields.SecondUserField[move[0]][move[1]]]
+            fields.UserTurn = room.SecondUser
             fields.save()
             move.append(fields.SecondUserField[move[0]][move[1]])
+        move.append(scope.get('user', None).id)
         return move
 
     @database_sync_to_async

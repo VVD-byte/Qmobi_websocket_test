@@ -26,7 +26,7 @@ SECRET_KEY = 'django-insecure-y!90b(zwu6&y$cxf50ae6!3iyg53#d(gnlce9j2&^)bpc2b^#d
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['0.0.0.0']
+ALLOWED_HOSTS = ['0.0.0.0', '192.168.1.149']
 
 
 # Application definition
@@ -93,7 +93,7 @@ DATABASES = {
         'NAME': 'qmobi',
         'USER': 'vova',
         'PASSWORD': 'vova',
-        'HOST': 'localhost',
+        'HOST': 'db',
         'PORT': '5432',
     }
 }
